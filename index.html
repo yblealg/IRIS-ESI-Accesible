@@ -1,1 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IRIS - Interfaz de Respuesta Integral y Sensorial</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body role="application" aria-label="IRIS: Estrategia Pedagógica de Educación Sexual Integral">
 
+    <header role="banner">
+        <h1 id="logo-iris">I.R.I.S.</h1>
+        <p class="acronimo">Interfaz de Respuesta Integral y Sensorial</p>
+        <p class="eslogan"><em>Tu voz, tus derechos, tu autonomía.</em></p>
+    </header>
+
+    <main id="contenedor-principal" role="main">
+        
+        <section id="pantalla-interactiva" aria-live="polite">
+            <div id="cuadro-texto">
+                <p id="texto-dinamico">Iniciando sistema...</p>
+            </div>
+        </section>
+
+        <div id="indicador-escucha" class="oculto" aria-hidden="true">
+            <div class="pulso"></div>
+            <p>IRIS está escuchando...</p>
+        </div>
+
+        <nav id="controles-emergencia">
+            <button id="btn-iniciar" onclick="iniciarSistema()">Activar IRIS</button>
+        </nav>
+
+    </main>
+
+    <footer role="contentinfo">
+        <p>Estrategia Pedagógica Accesible - Tarea 3 UNAD</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
