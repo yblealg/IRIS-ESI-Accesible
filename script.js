@@ -1,73 +1,101 @@
-/// CONFIGURACIÓN DE IDENTIDAD Y MOTORES
+// ==========================================
+// 1. CONFIGURACIÓN DE IDENTIDAD Y MOTORES
+// ==========================================
 let nombreUsuario = "";
 const sintetizador = window.speechSynthesis;
 const Reconocimiento = window.SpeechRecognition || window.webkitSpeechRecognition;
-const oido = new Reconocimiento();
 
-oido.lang = 'es-CO';
+// Verificar soporte del navegador
+if (!Reconocimiento) {
+    alert("Este navegador no soporta el reconocimiento de voz. Por favor, usa Google Chrome o Microsoft Edge.");
+}
+
+const oido = new Reconocimiento();
+oido.lang = 'es-CO'; // Acento colombiano para mayor cercanía
 oido.continuous = false;
 oido.interimResults = false;
 
-// FUNCIÓN PARA QUE IRIS HABLE
+// ==========================================
+// 2. FUNCIÓN DE VOZ (HABLAR)
+// ==========================================
 function hablar(mensaje) {
-    sintetizador.cancel(); // Detiene cualquier audio previo
+    sintetizador.cancel(); // Detener cualquier audio previo
     const lectura = new SpeechSynthesisUtterance(mensaje);
     lectura.lang = 'es-CO';
     lectura.rate = 1.0;
 
+    // Actualización visual para baja visión
     document.getElementById('texto-dinamico').innerText = mensaje;
-    sintetizador.speak(lectura);
-
-    // Activa el micrófono automáticamente al terminar de hablar
+    
     lectura.onend = () => {
-        iniciarEscucha();
+        // Retraso de seguridad para que no se escuche a sí misma
+        setTimeout(() => iniciarEscucha(), 600);
     };
+
+    sintetizador.speak(lectura);
 }
 
-// FUNCIÓN PARA QUE IRIS ESCUCHE
+// ==========================================
+// 3. FUNCIÓN DE ESCUCHA (OÍR)
+// ==========================================
 function iniciarEscucha() {
     try {
         oido.start();
-        console.log("IRIS escuchando...");
+        document.getElementById('texto-dinamico').innerText = ">>> IRIS ESCUCHANDO... (Habla ahora)";
+        document.getElementById('cuadro-texto').style.borderColor = "yellow"; 
     } catch (e) {
-        console.log("Micrófono ya activo");
+        console.log("El micrófono ya está activo.");
     }
 }
 
-// PROCESAMIENTO DE LO QUE EL USUARIO DICE
+// ==========================================
+// 4. PROCESAMIENTO DE RESPUESTAS
+// ==========================================
 oido.onresult = (event) => {
     const vozEscuchada = event.results[0][0].transcript.toLowerCase();
-    console.log("Usuario dijo:", vozEscuchada);
+    document.getElementById('cuadro-texto').style.borderColor = "#00FF00";
 
     if (!nombreUsuario) {
+        // Captura del nombre para fomentar la autonomía del sujeto
         nombreUsuario = vozEscuchada;
-        hablar(`Mucho gusto, ${nombreUsuario}. Tienes el derecho a recibir información clara. Di una dimensión para explorar: CUERPO, MITOS o DECISIÓN.`);
+        hablar(`Mucho gusto, ${nombreUsuario}. Como ciudadano, tienes derecho a la información. Elige una dimensión para explorar: CUERPO, MITOS o DECISIÓN.`);
     } else {
+        // Navegación por las dimensiones de la ESI
         procesarNavegacion(vozEscuchada);
     }
 };
 
-// LÓGICA PEDAGÓGICA POR DIMENSIONES
+// Manejo de silencios o errores
+oido.onend = () => {
+    if (document.getElementById('texto-dinamico').innerText.includes("ESCUCHANDO")) {
+        document.getElementById('texto-dinamico').innerText = "No logré escucharte. Haz clic en el botón para intentar de nuevo.";
+        document.getElementById('cuadro-texto').style.borderColor = "red";
+    }
+};
+
+// ==========================================
+// 5. LÓGICA PEDAGÓGICA (DIMENSIONES)
+// ==========================================
 function procesarNavegacion(comando) {
-    if (comando.includes("cuerpo")) {
-        hablar(`${nombreUsuario}, la dimensión biológica trata sobre tu salud y tu anatomía. ¿Quieres explorar MITOS o DECISIÓN?`);
+    if (comando.includes("cuerpo") || comando.includes("biológica")) {
+        hablar(`${nombreUsuario}, la dimensión biológica nos enseña sobre el autocuidado y el conocimiento de nuestra anatomía. ¿Quieres ir a MITOS o DECISIÓN?`);
     } 
-    else if (comando.includes("mitos")) {
-        hablar("La dimensión social rompe prejuicios. Las personas con discapacidad tienen derecho al deseo y al placer. ¿Qué sigue? ¿CUERPO o DECISIÓN?");
+    else if (comando.includes("mitos") || comando.includes("social")) {
+        hablar("La dimensión social nos dice que la sexualidad no tiene barreras. Es un mito que las personas con discapacidad no tengan deseos. ¿CUERPO o DECISIÓN?");
     } 
-    else if (comando.includes("decisión") || comando.includes("decisión")) {
-        hablar(`${nombreUsuario}, la dimensión ética es tu autonomía. Tú decides sobre tu cuerpo y das el consentimiento. Di INICIO para volver a empezar.`);
+    else if (comando.includes("decisión") || comando.includes("ética") || comando.includes("consentimiento")) {
+        hablar(`${nombreUsuario}, la dimensión ética trata sobre tu autonomía. Tú tienes el poder de decidir y dar tu consentimiento siempre. Di INICIO para volver.`);
     } 
     else if (comando.includes("inicio")) {
-        hablar(`Muy bien ${nombreUsuario}. Elige de nuevo: CUERPO, MITOS o DECISIÓN.`);
+        hablar(`Perfecto ${nombreUsuario}, volvamos a empezar. Elige: CUERPO, MITOS o DECISIÓN.`);
     } 
     else {
-        hablar("No te entendí bien. Intenta decir una de las dimensiones: Cuerpo, Mitos o Decisión.");
+        hablar("No comprendí esa opción. Por favor, di: Cuerpo, Mitos o Decisión.");
     }
 }
 
-// INICIO DEL SISTEMA
+// Inicio manual por interacción del usuario (Requisito de navegadores)
 function iniciarSistema() {
-    const bienvenida = "Hola, soy I.R.I.S. Tu voz, tus derechos, tu autonomía. Soy tu guía de Educación Sexual Integral. Antes de empezar, ¿cuál es tu nombre?";
-    hablar(bienvenida);
+    nombreUsuario = ""; 
+    hablar("Hola, soy I.R.I.S. Interfaz de Respuesta Integral y Sensorial. ¿Podrías decirme tu nombre?");
 }
