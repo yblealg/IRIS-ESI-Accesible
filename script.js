@@ -11,6 +11,7 @@ oido.interimResults = false;
 // FUNCIÓN PARA SELECCIONAR VOZ FEMENINA LATINA
 function obtenerVozFemenina() {
     const voces = sintetizador.getVoices();
+    
     // Prioridad: Voces de Colombia, México o generales de Google/Microsoft
     return voces.find(v => (v.lang.includes('es-CO') || v.lang.includes('es-MX') || v.lang.includes('es-ES')) && 
                     (v.name.includes('Helena') || v.name.includes('Sabina') || v.name.includes('Dalia') || v.name.includes('Google'))) 
@@ -89,7 +90,7 @@ function procesarComandos(comando) {
 // ACTIVACIÓN DEL SISTEMA
 function iniciarSistema() {
     nombreUsuario = ""; 
-    hablar("Hola, soy I.R.I.S. Tu guía de educación sexual. ¿Cuál es tu nombre?");
+    hablar("Hola, soy IRIS. Tu guía de educación sexual. ¿Cuál es tu nombre?");
 }
 
 // ACCESIBILIDAD GLOBAL (CLIC O TECLA)
