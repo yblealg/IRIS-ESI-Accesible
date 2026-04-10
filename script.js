@@ -105,7 +105,7 @@ function procesarNavegacion(comando) {
 // Inicio manual por interacción del usuario (Requisito de navegadores)
 function iniciarSistema() {
     nombreUsuario = ""; 
-    hablar("Hola, soy I.R.I.S. Interfaz de Respuesta Integral y Sensorial. ¿Podrías decirme tu nombre?");
+    hablar("Hola, soy IRIS. Interfaz de Respuesta Integral y Sensorial. ¿Podrías decirme tu nombre?");
 }
 
 // ACTIVADORES DE ACCESIBILIDAD GLOBAL
