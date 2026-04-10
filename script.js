@@ -75,15 +75,29 @@ oido.onend = () => {
 // NAVEGACIÓN PEDAGÓGICA
 function procesarComandos(comando) {
     if (comando.includes("cuerpo")) {
-        hablar(`${nombreUsuario}, la dimensión biológica trata sobre tu salud y autonomía física. ¿Quieres ver MITOS o DECISIÓN?`);
-    } else if (comando.includes("mitos")) {
-        hablar("La dimensión social rompe barreras. No hay límites para el deseo en la discapacidad. ¿Quieres ir a CUERPO o DECISIÓN?");
-    } else if (comando.includes("decisión")) {
-        hablar(`${nombreUsuario}, la dimensión ética es tu poder de decidir. El consentimiento es tuyo. Di INICIO para volver.`);
-    } else if (comando.includes("inicio")) {
-        hablar(`Hola de nuevo ${nombreUsuario}. Elige: CUERPO, MITOS o DECISIÓN.`);
-    } else {
-        hablar("No entendí. Intenta decir: Cuerpo, Mitos o Decisión.");
+        hablar(`${nombreUsuario}, la dimensión biológica trata sobre tu salud y autonomía física. No se trata solo de la ausencia de enfermedad, ` +
+               `sino del conocimiento de tu anatomía, tus sentidos y tus funciones reproductivas. Implica el derecho a recibir servicios de salud ` +
+               `adaptados a tus necesidades, el acceso a información clara sobre higiene, prevención y la libertad de disfrutar de tu bienestar físico ` +
+               `sin que la discapacidad sea vista como una limitación de tu integridad. ¿Quieres ver MITOS o DECISIÓN?`);
+    } 
+    else if (comando.includes("mitos")) {
+        hablar(`Escucha bien, ${nombreUsuario}. La dimensión social rompe barreras. No hay límites para el deseo en la discapacidad. ` +
+               `Reconoce que las personas con discapacidad son seres sexuales con derecho a amar, ser amados y expresar su erotismo sin juicios. ` +
+               `Esta dimensión denuncia las barreras del entorno y los prejuicios de la sociedad que intentan infantilizar o invisibilizar tu sexualidad. ` +
+               `Se trata de tu derecho a participar en la vida social, a formar una familia si lo deseas y a que tu intimidad sea respetada como la de cualquier otro ciudadano. ` +
+               `¿Quieres ir a CUERPO o DECISIÓN?`);
+    } 
+    else if (comando.includes("decisión") || comando.includes("ética")) {
+        hablar(`${nombreUsuario}, la dimensión ética es tu poder de decidir. Se fundamenta en la autonomía y en la capacidad de elegir tus propios valores y estilo de vida. ` +
+               `Implica el juicio crítico para distinguir entre lo que deseas y lo que otros te imponen, asegurando que el consentimiento sea siempre el pilar de tus relaciones. ` +
+               `Es tu derecho a decir no, a decir sí, y a ser responsable de tus decisiones afectivas en un marco de respeto y libertad personal. ` +
+               `¿Quieres volver a explorar? Di: CUERPO, MITOS o INICIO.`);
+    } 
+    else if (comando.includes("inicio")) {
+        hablar(`Hola de nuevo ${nombreUsuario}. Elige una dimensión para profundizar: CUERPO, MITOS o DECISIÓN.`);
+    } 
+    else {
+        hablar("No logré entenderte. Intenta decir una de las opciones: Cuerpo, Mitos o Decisión.");
     }
 }
 
