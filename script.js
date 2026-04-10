@@ -1,125 +1,107 @@
-// ==========================================
-// 1. CONFIGURACIÓN DE IDENTIDAD Y MOTORES
-// ==========================================
+// CONFIGURACIÓN DE NAVEGACIÓN Y MOTORES
 let nombreUsuario = "";
 const sintetizador = window.speechSynthesis;
 const Reconocimiento = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-// Verificar soporte del navegador
-if (!Reconocimiento) {
-    alert("Este navegador no soporta el reconocimiento de voz. Por favor, usa Google Chrome o Microsoft Edge.");
-}
-
 const oido = new Reconocimiento();
-oido.lang = 'es-CO'; // Acento colombiano para mayor cercanía
+
+oido.lang = 'es-CO';
 oido.continuous = false;
 oido.interimResults = false;
 
-// ==========================================
-// 2. FUNCIÓN DE VOZ (HABLAR)
-// ==========================================
-function hablar(mensaje) {
-    sintetizador.cancel(); // Detener cualquier audio previo
-    const lectura = new SpeechSynthesisUtterance(mensaje);
-    lectura.lang = 'es-CO';
-    lectura.rate = 1.0;
+// FUNCIÓN PARA SELECCIONAR VOZ FEMENINA LATINA
+function obtenerVozFemenina() {
+    const voces = sintetizador.getVoices();
+    // Prioridad: Voces de Colombia, México o generales de Google/Microsoft
+    return voces.find(v => (v.lang.includes('es-CO') || v.lang.includes('es-MX') || v.lang.includes('es-ES')) && 
+                    (v.name.includes('Helena') || v.name.includes('Sabina') || v.name.includes('Dalia') || v.name.includes('Google'))) 
+           || voces.find(v => v.lang.includes('es'));
+}
 
-    // Actualización visual para baja visión
-    document.getElementById('texto-dinamico').innerText = mensaje;
+// FUNCIÓN DE VOZ DE IRIS
+function hablar(mensaje) {
+    sintetizador.cancel();
+    const lectura = new SpeechSynthesisUtterance(mensaje);
     
+    lectura.voice = obtenerVozFemenina();
+    lectura.lang = 'es-CO';
+    lectura.rate = 1.0; 
+    lectura.pitch = 1.1; // Tono ligeramente más agudo/femenino
+
+    document.getElementById('texto-dinamico').innerText = mensaje;
+    document.getElementById('cuadro-texto').style.borderColor = "#00FF00"; // Verde al hablar
+
     lectura.onend = () => {
-        // Retraso de seguridad para que no se escuche a sí misma
         setTimeout(() => iniciarEscucha(), 600);
     };
 
     sintetizador.speak(lectura);
 }
 
-// ==========================================
-// 3. FUNCIÓN DE ESCUCHA (OÍR)
-// ==========================================
+// FUNCIÓN DE ESCUCHA
 function iniciarEscucha() {
     try {
         oido.start();
         document.getElementById('texto-dinamico').innerText = ">>> IRIS ESCUCHANDO... (Habla ahora)";
-        document.getElementById('cuadro-texto').style.borderColor = "yellow"; 
-    } catch (e) {
-        console.log("El micrófono ya está activo.");
-    }
+        document.getElementById('cuadro-texto').style.borderColor = "yellow"; // Amarillo al oír
+    } catch (e) { console.log("Micrófono activo"); }
 }
 
-// ==========================================
-// 4. PROCESAMIENTO DE RESPUESTAS
-// ==========================================
+// REACCIÓN AL HABLAR
 oido.onresult = (event) => {
-    const vozEscuchada = event.results[0][0].transcript.toLowerCase();
-    document.getElementById('cuadro-texto').style.borderColor = "#00FF00";
-
+    const voz = event.results[0][0].transcript.toLowerCase();
+    
     if (!nombreUsuario) {
-        // Captura del nombre para fomentar la autonomía del sujeto
-        nombreUsuario = vozEscuchada;
-        hablar(`Mucho gusto, ${nombreUsuario}. Como ciudadano, tienes derecho a la información. Elige una dimensión para explorar, debes pronunciar algunas e
-            de estas palabras: CUERPO, MITOS o DECISIÓN.`);
+        nombreUsuario = voz;
+        hablar(`Mucho gusto, ${nombreUsuario}. Tienes derecho a decidir sobre tu vida. Di: CUERPO, MITOS o DECISIÓN.`);
     } else {
-        // Navegación por las dimensiones de la ESI
-        procesarNavegacion(vozEscuchada);
+        procesarComandos(voz);
     }
 };
 
-// Manejo de silencios o errores
+// MANEJO DE ERRORES/SILENCIOS
 oido.onend = () => {
     if (document.getElementById('texto-dinamico').innerText.includes("ESCUCHANDO")) {
-        // Cambiamos el mensaje para que el usuario sepa que puede tocar cualquier tecla
-        const mensajeError = "No logré escucharte. Presiona cualquier tecla o toca la pantalla para intentar de nuevo.";
-        document.getElementById('texto-dinamico').innerText = mensajeError;
-        document.getElementById('cuadro-texto').style.borderColor = "red";
+        const msg = "No logré escucharte. Toca cualquier parte de la pantalla o presiona una tecla para intentar de nuevo.";
+        document.getElementById('texto-dinamico').innerText = msg;
+        document.getElementById('cuadro-texto').style.borderColor = "red"; // Rojo en error
         
-        // Opcional: Que IRIS diga que no escuchó
-        const avisoVoz = new SpeechSynthesisUtterance("No logré escucharte. Toca la pantalla para intentar de nuevo.");
-        avisoVoz.lang = 'es-CO';
-        sintetizador.speak(avisoVoz);
+        const aviso = new SpeechSynthesisUtterance("No te escuché. Toca la pantalla para reintentar.");
+        aviso.voice = obtenerVozFemenina();
+        sintetizador.speak(aviso);
     }
 };
 
-// ==========================================
-// 5. LÓGICA PEDAGÓGICA (DIMENSIONES)
-// ==========================================
-function procesarNavegacion(comando) {
-    if (comando.includes("cuerpo") || comando.includes("biológica")) {
-        hablar(`${nombreUsuario}, la dimensión biológica nos enseña sobre el autocuidado y el conocimiento de nuestra anatomía. ¿Quieres ir a MITOS o DECISIÓN?`);
-    } 
-    else if (comando.includes("mitos") || comando.includes("social")) {
-        hablar("La dimensión social nos dice que la sexualidad no tiene barreras. Es un mito que las personas con discapacidad no tengan deseos. ¿CUERPO o DECISIÓN?");
-    } 
-    else if (comando.includes("decisión") || comando.includes("ética") || comando.includes("consentimiento")) {
-        hablar(`${nombreUsuario}, la dimensión ética trata sobre tu autonomía. Tú tienes el poder de decidir y dar tu consentimiento siempre. Di INICIO para volver.`);
-    } 
-    else if (comando.includes("inicio")) {
-        hablar(`Perfecto ${nombreUsuario}, volvamos a empezar. Elige: CUERPO, MITOS o DECISIÓN.`);
-    } 
-    else {
-        hablar("No comprendí esa opción. Por favor, di: Cuerpo, Mitos o Decisión.");
+// NAVEGACIÓN PEDAGÓGICA
+function procesarComandos(comando) {
+    if (comando.includes("cuerpo")) {
+        hablar(`${nombreUsuario}, la dimensión biológica trata sobre tu salud y autonomía física. ¿Quieres ver MITOS o DECISIÓN?`);
+    } else if (comando.includes("mitos")) {
+        hablar("La dimensión social rompe barreras. No hay límites para el deseo en la discapacidad. ¿Quieres ir a CUERPO o DECISIÓN?");
+    } else if (comando.includes("decisión")) {
+        hablar(`${nombreUsuario}, la dimensión ética es tu poder de decidir. El consentimiento es tuyo. Di INICIO para volver.`);
+    } else if (comando.includes("inicio")) {
+        hablar(`Hola de nuevo ${nombreUsuario}. Elige: CUERPO, MITOS o DECISIÓN.`);
+    } else {
+        hablar("No entendí. Intenta decir: Cuerpo, Mitos o Decisión.");
     }
 }
 
-// Inicio manual por interacción del usuario (Requisito de navegadores)
+// ACTIVACIÓN DEL SISTEMA
 function iniciarSistema() {
     nombreUsuario = ""; 
-    hablar("Hola, soy IRIS. Interfaz de Respuesta Integral y Sensorial. ¿Podrías decirme tu nombre?");
+    hablar("Hola, soy I.R.I.S. Tu guía de educación sexual. ¿Cuál es tu nombre?");
 }
 
-// ACTIVADORES DE ACCESIBILIDAD GLOBAL
-// 1. Si presiona cualquier tecla
+// ACCESIBILIDAD GLOBAL (CLIC O TECLA)
 window.addEventListener('keydown', () => {
-    if (document.getElementById('cuadro-texto').style.borderColor === "red") {
-        iniciarSistema();
-    }
+    if (document.getElementById('cuadro-texto').style.borderColor === "red") iniciarSistema();
 });
 
-// 2. Si toca cualquier parte de la pantalla (para tablets o celulares)
 window.addEventListener('click', (e) => {
-    // Evitamos que se dispare si ya hizo clic en el botón (para no duplicar)
     if (e.target.id !== "btn-iniciar" && document.getElementById('cuadro-texto').style.borderColor === "red") {
         iniciarSistema();
     }
 });
+
+// Carga de voces para navegadores lentos
+speechSynthesis.onvoiceschanged = () => obtenerVozFemenina();
