@@ -107,3 +107,19 @@ function iniciarSistema() {
     nombreUsuario = ""; 
     hablar("Hola, soy I.R.I.S. Interfaz de Respuesta Integral y Sensorial. ¿Podrías decirme tu nombre?");
 }
+
+// ACTIVADORES DE ACCESIBILIDAD GLOBAL
+// 1. Si presiona cualquier tecla
+window.addEventListener('keydown', () => {
+    if (document.getElementById('cuadro-texto').style.borderColor === "red") {
+        iniciarSistema();
+    }
+});
+
+// 2. Si toca cualquier parte de la pantalla (para tablets o celulares)
+window.addEventListener('click', (e) => {
+    // Evitamos que se dispare si ya hizo clic en el botón (para no duplicar)
+    if (e.target.id !== "btn-iniciar" && document.getElementById('cuadro-texto').style.borderColor === "red") {
+        iniciarSistema();
+    }
+});
