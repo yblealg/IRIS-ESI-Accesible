@@ -58,7 +58,8 @@ oido.onresult = (event) => {
     if (!nombreUsuario) {
         // Captura del nombre para fomentar la autonomía del sujeto
         nombreUsuario = vozEscuchada;
-        hablar(`Mucho gusto, ${nombreUsuario}. Como ciudadano, tienes derecho a la información. Elige una dimensión para explorar: CUERPO, MITOS o DECISIÓN.`);
+        hablar(`Mucho gusto, ${nombreUsuario}. Como ciudadano, tienes derecho a la información. Elige una dimensión para explorar, debes pronunciar algunas e
+            de estas palabras: CUERPO, MITOS o DECISIÓN.`);
     } else {
         // Navegación por las dimensiones de la ESI
         procesarNavegacion(vozEscuchada);
@@ -68,8 +69,15 @@ oido.onresult = (event) => {
 // Manejo de silencios o errores
 oido.onend = () => {
     if (document.getElementById('texto-dinamico').innerText.includes("ESCUCHANDO")) {
-        document.getElementById('texto-dinamico').innerText = "No logré escucharte. Haz clic en el botón para intentar de nuevo.";
+        // Cambiamos el mensaje para que el usuario sepa que puede tocar cualquier tecla
+        const mensajeError = "No logré escucharte. Presiona cualquier tecla o toca la pantalla para intentar de nuevo.";
+        document.getElementById('texto-dinamico').innerText = mensajeError;
         document.getElementById('cuadro-texto').style.borderColor = "red";
+        
+        // Opcional: Que IRIS diga que no escuchó
+        const avisoVoz = new SpeechSynthesisUtterance("No logré escucharte. Toca la pantalla para intentar de nuevo.");
+        avisoVoz.lang = 'es-CO';
+        sintetizador.speak(avisoVoz);
     }
 };
 
