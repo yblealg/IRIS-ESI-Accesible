@@ -3,102 +3,116 @@
     --neon-verde: #00FF00;
     --neon-amarillo: #FFFF00;
     --error-rojo: #FF0000;
+    --blanco: #FFFFFF;
 }
 
 body {
     background-color: var(--fondo);
-    color: var(--neon-verde);
+    color: var(--blanco);
     font-family: 'Segoe UI', Arial, sans-serif;
     margin: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    height: 100vh;
+    justify-content: flex-start; /* Flow from top */
+    min-height: 100vh;
     text-align: center;
-    cursor: pointer; /* Indica que toda la pantalla es interactiva */
+    cursor: pointer;
+    overflow-x: hidden;
 }
 
-header h1 {
-    font-size: clamp(3rem, 10vw, 6rem);
-    margin: 0;
-    text-shadow: 0 0 15px var(--neon-verde);
-}
+header, main { width: 100%; max-width: 800px; padding: 20px; box-sizing: border-box; }
 
-.acronimo {
-    font-size: 1.5rem;
-    color: white;
-}
-
-.eslogan {
-    color: var(--neon-amarillo);
-    font-size: 1.2rem;
-    margin-bottom: 2rem;
-}
-
-/* ESTILO OPTIMIZADO PARA EL LOGO DE LA UNAD (CENTRADOR) */
+/* --- LOGO UNAD (PEQUEÑO Y CENTRADO) --- */
 #logo-unad {
-    /* 1. Reducción de tamaño: Aproximadamente un 66% menos (1/3 del original) */
-    width: 170px; /* Tamaño profesional y legible */
-    height: auto; /* Mantiene la proporción */
-    
-    /* 2. Mantener su posición central */
-    display: block; /* Ocupa su propia línea */
-    margin: 20px auto 10px auto; /* Centrado automático: margen-arriba auto derecho margen-abajo auto izquierdo */
-    position: static; /* Asegura que no flote, sino que se quede donde está */
-    
-    /* 3. Ajustes de contraste para fondo negro */
-    /* Este filtro la vuelve blanca o clara para que resalte en el negro */
-    filter: brightness(0) invert(1); 
-    
-    opacity: 0.9; /* Un acabado elegante */
-}
-#robot-avatar {
-    width: 100px; /* Tamaño ideal */
+    width: 160px; /* Reducido al ~30% */
     height: auto;
     display: block;
-    margin: 10px auto; /* Centrado */
-    filter: drop-shadow(0 0 10px #00FF00); /* Brillo verde neón */
-    animation: levitar 3s ease-in-out infinite;
+    margin: 10px auto;
+    position: static;
+    opacity: 0.9;
+    /* Quitamos filtros complejos para que use su fondo negro original */
 }
 
-/* Animación para que el robot se mueva suavemente arriba y abajo */
-@keyframes levitar {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-15px); }
+/* Títulos IRIS */
+#logo-iris { font-size: clamp(2.5rem, 8vw, 4.5rem); margin: 0; color: var(--neon-verde); text-shadow: 0 0 10px var(--neon-verde); }
+.acronimo { font-size: 1.2rem; color: var(--blanco); margin: 5px 0; }
+.eslogan { color: var(--neon-amarillo); font-size: 1rem; margin-bottom: 10px; }
+
+/* --- AVATAR ROBOT (FUNCIONAL) --- */
+#avatar-robot-contenedor {
+    margin: 10px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100px; /* Espacio reservado para el robot */
 }
 
+#robot-avatar {
+    width: 80px; /* Tamaño profesional, no invade */
+    height: auto;
+    transition: all 0.4s ease-out; /* Transición suave entre estados */
+}
+
+/* ESTADOS DEL ROBOT (Activados por JS) */
+.robot-reposo {
+    filter: drop-shadow(0 0 5px var(--neon-verde));
+    animation: levitarReposo 4s ease-in-out infinite;
+}
+
+.robot-hablando {
+    filter: drop-shadow(0 0 15px var(--neon-verde)) brightness(1.1);
+    animation: vibrarHabla 0.3s ease-in-out infinite; /* Movimiento rápido de habla */
+}
+
+.robot-escuchando {
+    filter: drop-shadow(0 0 20px var(--neon-amarillo));
+    animation: pulsoEscucha 1.5s ease-in-out infinite; /* Pulso lento de escucha */
+    transform: scale(1.1);
+}
+
+.robot-error {
+    filter: drop-shadow(0 0 15px var(--error-rojo));
+    animation: temblorError 0.5s ease-in-out;
+}
+
+/* --- CUADRO DE TEXTO (CENTRAL) --- */
 #cuadro-texto {
     border: 4px solid var(--neon-verde);
-    padding: 2rem;
-    border-radius: 25px;
-    width: 85%;
-    max-width: 700px;
-    min-height: 200px;
+    padding: 1.5rem;
+    border-radius: 20px;
+    margin: 10px auto;
+    min-height: 150px;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 0 30px rgba(0, 255, 0, 0.15);
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.1);
     transition: all 0.3s ease;
 }
 
-#texto-dinamico {
-    font-size: clamp(1.5rem, 4vw, 2.2rem);
-    font-weight: bold;
-    line-height: 1.3;
-}
+#texto-dinamico { font-size: clamp(1.2rem, 3.5vw, 1.8rem); font-weight: bold; line-height: 1.3; color: var(--neon-verde); }
 
+/* --- BOTÓN (TAMAÑO NORMAL) --- */
 #btn-iniciar {
     background-color: var(--neon-verde);
     color: black;
     border: none;
-    padding: 20px 50px;
-    font-size: 1.5rem;
+    padding: 15px 35px; /* Tamaño normal, no gigante */
+    font-size: 1.2rem;
     font-weight: bold;
     cursor: pointer;
-    margin-top: 2rem;
-    border-radius: 50px;
-    box-shadow: 0 0 15px var(--neon-verde);
+    margin-top: 15px;
+    border-radius: 25px;
+    box-shadow: 0 0 10px var(--neon-verde);
 }
 
-#btn-iniciar:active { transform: scale(0.95); }
+#btn-iniciar:active { transform: scale(0.96); }
+
+/* --- ANIMACIONES CSS --- */
+@keyframes levitarReposo { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+@keyframes vibrarHabla { 0% { transform: translate(0,0); } 50% { transform: translate(1px, -2px); } 100% { transform: translate(-1px, 2px); } }
+@keyframes pulsoEscucha { 0% { opacity: 0.8; } 50% { opacity: 1; filter: drop-shadow(0 0 25px var(--neon-amarillo)); } 100% { opacity: 0.8; } }
+@keyframes temblorError { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-5px); } 40% { transform: translateX(5px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(3px); } }
+
+/* Ajustes celulares */
+@media (max-width: 600px) { header, main { padding: 10px; } #logo-unad { width: 120px; } #robot-avatar { width: 60px; } }

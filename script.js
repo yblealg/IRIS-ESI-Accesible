@@ -3,38 +3,52 @@ let nombreUsuario = "";
 const sintetizador = window.speechSynthesis;
 const Reconocimiento = window.SpeechRecognition || window.webkitSpeechRecognition;
 const oido = new Reconocimiento();
+const robot = document.getElementById('robot-avatar');
 
 oido.lang = 'es-CO';
 oido.continuous = false;
 oido.interimResults = false;
 
-// FUNCIÓN PARA SELECCIONAR VOZ FEMENINA LATINA
-function obtenerVozFemenina() {
+// FUNCIÓN PARA SELECCIONAR VOZ FEMENINA LATINA (CARGA ASÍNCRONA)
+let vozFemenina = null;
+function cargarVoces() {
     const voces = sintetizador.getVoices();
-    // Prioridad: Voces de Colombia, México o generales de Google/Microsoft
-    return voces.find(v => (v.lang.includes('es-CO') || v.lang.includes('es-MX') || v.lang.includes('es-ES')) && 
-                    (v.name.includes('Helena') || v.name.includes('Sabina') || v.name.includes('Dalia') || v.name.includes('Google'))) 
-           || voces.find(v => v.lang.includes('es'));
+    vozFemenina = voces.find(v => (v.lang.includes('es-CO') || v.lang.includes('es-MX') || v.lang.includes('es-ES')) && 
+                                (v.name.includes('Helena') || v.name.includes('Sabina') || v.name.includes('Dalia') || v.name.includes('Google'))) 
+                 || voces.find(v => v.lang.includes('es'));
+}
+// Forzar carga de voces en navegadores lentos
+if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = cargarVoces;
+cargarVoces();
+
+// FUNCIÓN PARA GESTIONAR ESTADOS VISUALES DEL ROBOT
+function setRobotEstado(estado) {
+    if (!robot) return;
+    robot.className = ""; // Limpiar clases anteriores
+    switch(estado) {
+        case 'hablando': robot.classList.add('robot-hablando'); break;
+        case 'escuchando': robot.classList.add('robot-escuchando'); break;
+        case 'error': robot.classList.add('robot-error'); break;
+        default: robot.classList.add('robot-reposo');
+    }
 }
 
-// FUNCIÓN DE VOZ DE IRIS (CON REACCIÓN DEL ROBOT)
+// FUNCIÓN DE VOZ DE IRIS (DINÁMICA)
 function hablar(mensaje) {
     sintetizador.cancel();
     const lectura = new SpeechSynthesisUtterance(mensaje);
     
-    lectura.voice = obtenerVozFemenina();
+    if (!vozFemenina) cargarVoces(); // Intento final de carga
+    lectura.voice = vozFemenina;
     lectura.lang = 'es-CO';
     lectura.rate = 1.0; 
     lectura.pitch = 1.1; 
 
     document.getElementById('texto-dinamico').innerText = mensaje;
     document.getElementById('cuadro-texto').style.borderColor = "#00FF00"; 
-
-    // REACCIÓN DEL ROBOT: Brillo verde al hablar
-    const robot = document.getElementById('robot-avatar');
-    if (robot) {
-        robot.style.filter = "drop-shadow(0 0 20px #00FF00)";
-    }
+    
+    // ACTIVAR ANIMACIÓN DE HABLA
+    setRobotEstado('hablando');
 
     lectura.onend = () => {
         setTimeout(() => iniciarEscucha(), 600);
@@ -43,18 +57,16 @@ function hablar(mensaje) {
     sintetizador.speak(lectura);
 }
 
-// FUNCIÓN DE ESCUCHA (CON REACCIÓN DEL ROBOT)
+// FUNCIÓN DE ESCUCHA (DINÁMICA)
 function iniciarEscucha() {
     try {
         oido.start();
         document.getElementById('texto-dinamico').innerText = ">>> IRIS ESCUCHANDO... (Habla ahora)";
         document.getElementById('cuadro-texto').style.borderColor = "yellow"; 
         
-        // REACCIÓN DEL ROBOT: Brillo amarillo al escuchar
-        const robot = document.getElementById('robot-avatar');
-        if (robot) {
-            robot.style.filter = "drop-shadow(0 0 25px yellow)";
-        }
+        // ACTIVAR ANIMACIÓN DE ESCUCHA (PULSO AMARILLO)
+        setRobotEstado('escuchando');
+
     } catch (e) { console.log("Micrófono activo"); }
 }
 
@@ -77,14 +89,13 @@ oido.onend = () => {
         document.getElementById('texto-dinamico').innerText = msg;
         document.getElementById('cuadro-texto').style.borderColor = "red"; 
         
-        // REACCIÓN DEL ROBOT: Brillo rojo en error
-        const robot = document.getElementById('robot-avatar');
-        if (robot) {
-            robot.style.filter = "drop-shadow(0 0 20px red)";
-        }
+        // ACTIVAR ANIMACIÓN DE ERROR (TEMBLOR ROJO)
+        setRobotEstado('error');
+        // Volver a reposo tras el temblor
+        setTimeout(() => setRobotEstado('reposo'), 600);
 
         const aviso = new SpeechSynthesisUtterance("No te escuché. Toca la pantalla para reintentar.");
-        aviso.voice = obtenerVozFemenina();
+        aviso.voice = vozFemenina;
         sintetizador.speak(aviso);
     }
 };
@@ -121,19 +132,25 @@ function procesarComandos(comando) {
 // ACTIVACIÓN DEL SISTEMA
 function iniciarSistema() {
     nombreUsuario = ""; 
+    // Asegurar estado inicial del robot
+    setRobotEstado('reposo');
     hablar("Hola, soy IRIS. Tu guía de educación sexual. ¿Cuál es tu nombre?");
 }
 
 // ACCESIBILIDAD GLOBAL (CLIC O TECLA)
-window.addEventListener('keydown', () => {
-    if (document.getElementById('cuadro-texto').style.borderColor === "red") iniciarSistema();
-});
-
-window.addEventListener('click', (e) => {
-    if (e.target.id !== "btn-iniciar" && document.getElementById('cuadro-texto').style.borderColor === "red") {
+window.addEventListener('keydown', (e) => {
+    // Evitamos re-iniciar si ya está hablando o escuchando
+    if (document.getElementById('cuadro-texto').style.borderColor === "red" || 
+        document.getElementById('cuadro-texto').innerText.includes("Presiona")) {
         iniciarSistema();
     }
 });
 
-// Carga de voces para navegadores lentos
-speechSynthesis.onvoiceschanged = () => obtenerVozFemenina();
+window.addEventListener('click', (e) => {
+    // Evitamos si hizo clic en el botón (para no duplicar) o si ya está activo
+    if (e.target.id !== "btn-iniciar" && (
+        document.getElementById('cuadro-texto').style.borderColor === "red" || 
+        document.getElementById('cuadro-texto').innerText.includes("Presiona"))) {
+        iniciarSistema();
+    }
+});
