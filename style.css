@@ -1,139 +1,184 @@
+/* ============================================================
+   ESTILOS GLOBALES E IDENTIDAD VISUAL (IRIS - UNAD)
+   ============================================================ */
 :root {
     --fondo: #000000;
     --neon-verde: #00FF00;
     --neon-amarillo: #FFFF00;
     --error-rojo: #FF0000;
     --blanco: #FFFFFF;
+    --unad-azul: #003366; /* Color institucional por si se requiere */
 }
 
 body {
     background-color: var(--fondo);
     color: var(--blanco);
-    font-family: 'Segoe UI', Arial, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start; /* Flow from top */
+    justify-content: flex-start;
     min-height: 100vh;
     text-align: center;
-    cursor: pointer;
     overflow-x: hidden;
 }
 
-header, main { width: 100%; max-width: 800px; padding: 20px; box-sizing: border-box; }
-
-/* --- LOGO UNAD (PEQUEÑO Y CENTRADO) --- */
-#logo-unad {
-    width: 160px; /* Reducido al ~30% */
-    height: auto;
-    display: block;
-    margin: 10px auto;
-    position: static;
-    opacity: 0.9;
-    /* Quitamos filtros complejos para que use su fondo negro original */
+/* Contenedores principales */
+header, main { 
+    width: 100%; 
+    max-width: 800px; 
+    padding: 20px; 
+    box-sizing: border-box; 
 }
 
-/* Títulos IRIS */
-#logo-iris { font-size: clamp(2.5rem, 8vw, 4.5rem); margin: 0; color: var(--neon-verde); text-shadow: 0 0 10px var(--neon-verde); }
-.acronimo { font-size: 1.2rem; color: var(--blanco); margin: 5px 0; }
-.eslogan { color: var(--neon-amarillo); font-size: 1rem; margin-bottom: 10px; }
+/* --- LOGO UNAD (OPTIMIZADO PARA ALTA DEFINICIÓN) --- */
+#logo-unad {
+    width: 170px; /* Tamaño ideal: legible pero no invasivo */
+    height: auto;
+    display: block;
+    margin: 10px auto 20px auto; /* Espacio extra abajo para separar del robot */
+    opacity: 1;
+    filter: none; /* ELIMINADO: Sin filtros para mantener colores azul/naranja originales */
+    transition: transform 0.3s ease;
+}
 
-/* --- AVATAR ROBOT (FUNCIONAL) --- */
-#avatar-robot-contenedor {
-    margin: 10px 0;
+/* --- BLOQUE DE IDENTIDAD (ROBOT + NOMBRE) --- */
+.contenedor-linea {
     display: flex;
-    justify-content: center;
+    flex-direction: row; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 15px; /* Espacio equilibrado entre robot e IRIS */
+    margin: 10px 0;
+}
+
+#avatar-robot-contenedor {
+    display: flex;
     align-items: center;
-    height: 100px; /* Espacio reservado para el robot */
+    justify-content: center;
 }
 
 #robot-avatar {
-    width: 80px; /* Tamaño profesional, no invade */
+    width: 75px; /* Tamaño reducido para no competir con el título */
     height: auto;
-    transition: all 0.4s ease-out; /* Transición suave entre estados */
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* ESTADOS DEL ROBOT (Activados por JS) */
+/* Título Principal */
+#logo-iris { 
+    font-size: clamp(2.5rem, 8vw, 4rem); 
+    margin: 0; 
+    color: var(--neon-verde); 
+    text-shadow: 0 0 15px rgba(0, 255, 0, 0.7); 
+}
+
+/* Subtítulos */
+.acronimo { font-size: 1.1rem; color: var(--blanco); margin: 5px 0; letter-spacing: 1px; }
+.eslogan { color: var(--neon-amarillo); font-size: 1rem; margin-top: 0; font-style: italic; }
+
+/* ============================================================
+   ESTADOS DEL ROBOT (GESTIONADOS POR JAVASCRIPT)
+   ============================================================ */
+
+/* 1. Reposo: Movimiento suave */
 .robot-reposo {
-    filter: drop-shadow(0 0 5px var(--neon-verde));
+    filter: drop-shadow(0 0 8px var(--neon-verde));
     animation: levitarReposo 4s ease-in-out infinite;
 }
 
+/* 2. Hablando: Vibración activa */
 .robot-hablando {
-    filter: drop-shadow(0 0 15px var(--neon-verde)) brightness(1.1);
-    animation: vibrarHabla 0.3s ease-in-out infinite; /* Movimiento rápido de habla */
+    filter: drop-shadow(0 0 15px var(--neon-verde)) brightness(1.2);
+    animation: vibrarHabla 0.2s ease-in-out infinite;
 }
 
+/* 3. Escuchando: Pulso de atención */
 .robot-escuchando {
-    filter: drop-shadow(0 0 20px var(--neon-amarillo));
-    animation: pulsoEscucha 1.5s ease-in-out infinite; /* Pulso lento de escucha */
+    filter: drop-shadow(0 0 25px var(--neon-amarillo));
+    animation: pulsoEscucha 1.2s ease-in-out infinite;
     transform: scale(1.1);
 }
 
+/* 4. Error: Sacudida roja */
 .robot-error {
     filter: drop-shadow(0 0 15px var(--error-rojo));
     animation: temblorError 0.5s ease-in-out;
 }
 
-/* --- NUEVA ALINEACIÓN HORIZONTAL --- */
-.contenedor-linea {
-    display: flex;
-    flex-direction: row; /* Robot a la izquierda, IRIS a la derecha */
-    align-items: center; /* Los nivela a la misma altura */
-    justify-content: center; /* Los centra en la pantalla */
-    gap: 20px; /* Separación de 20px entre ellos */
-    margin: 10px 0;
-}
-
-/* Reajuste para que el texto de IRIS no se vea movido */
-#logo-iris {
-    margin: 0; 
-}
-
-/* Asegura que el contenedor del robot no estorbe la línea */
-#avatar-robot-contenedor {
-    margin: 0;
-    display: flex;
-}
-
-/* --- CUADRO DE TEXTO (CENTRAL) --- */
+/* ============================================================
+   INTERFAZ DE USUARIO (CUADRO Y BOTÓN)
+   ============================================================ */
 #cuadro-texto {
-    border: 4px solid var(--neon-verde);
-    padding: 1.5rem;
-    border-radius: 20px;
-    margin: 10px auto;
-    min-height: 150px;
+    border: 3px solid var(--neon-verde);
+    padding: 2rem;
+    border-radius: 25px;
+    margin: 20px auto;
+    min-height: 140px;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 0 20px rgba(0, 255, 0, 0.1);
-    transition: all 0.3s ease;
+    background-color: rgba(0, 255, 0, 0.03); /* Fondo sutil para legibilidad */
+    box-shadow: 0 0 30px rgba(0, 255, 0, 0.1);
+    transition: border-color 0.4s ease, box-shadow 0.4s ease;
 }
 
-#texto-dinamico { font-size: clamp(1.2rem, 3.5vw, 1.8rem); font-weight: bold; line-height: 1.3; color: var(--neon-verde); }
+#texto-dinamico { 
+    font-size: clamp(1.1rem, 3.2vw, 1.7rem); 
+    font-weight: 700; 
+    line-height: 1.4; 
+    color: var(--neon-verde); 
+}
 
-/* --- BOTÓN (TAMAÑO NORMAL) --- */
 #btn-iniciar {
     background-color: var(--neon-verde);
-    color: black;
+    color: #000;
     border: none;
-    padding: 15px 35px; /* Tamaño normal, no gigante */
-    font-size: 1.2rem;
-    font-weight: bold;
+    padding: 16px 40px;
+    font-size: 1.3rem;
+    font-weight: 800;
     cursor: pointer;
-    margin-top: 15px;
-    border-radius: 25px;
-    box-shadow: 0 0 10px var(--neon-verde);
+    margin-top: 20px;
+    border-radius: 50px;
+    box-shadow: 0 5px 15px rgba(0, 255, 0, 0.4);
+    transition: all 0.2s ease;
 }
 
-#btn-iniciar:active { transform: scale(0.96); }
+#btn-iniciar:hover { transform: scale(1.05); box-shadow: 0 0 25px var(--neon-verde); }
+#btn-iniciar:active { transform: scale(0.95); }
 
-/* --- ANIMACIONES CSS --- */
-@keyframes levitarReposo { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-@keyframes vibrarHabla { 0% { transform: translate(0,0); } 50% { transform: translate(1px, -2px); } 100% { transform: translate(-1px, 2px); } }
-@keyframes pulsoEscucha { 0% { opacity: 0.8; } 50% { opacity: 1; filter: drop-shadow(0 0 25px var(--neon-amarillo)); } 100% { opacity: 0.8; } }
-@keyframes temblorError { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-5px); } 40% { transform: translateX(5px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(3px); } }
+/* ============================================================
+   DEFINICIÓN DE ANIMACIONES (KEYFRAMES)
+   ============================================================ */
+@keyframes levitarReposo { 
+    0%, 100% { transform: translateY(0); } 
+    50% { transform: translateY(-12px); } 
+}
 
-/* Ajustes celulares */
-@media (max-width: 600px) { header, main { padding: 10px; } #logo-unad { width: 120px; } #robot-avatar { width: 60px; } }
+@keyframes vibrarHabla { 
+    0% { transform: translate(1px, 1px); } 
+    50% { transform: translate(-1px, -1px); } 
+    100% { transform: translate(1px, -1px); } 
+}
+
+@keyframes pulsoEscucha { 
+    0%, 100% { opacity: 0.9; transform: scale(1.05); } 
+    50% { opacity: 1; transform: scale(1.15); } 
+}
+
+@keyframes temblorError { 
+    0%, 100% { transform: translateX(0); } 
+    25% { transform: translateX(-8px); } 
+    75% { transform: translateX(8px); } 
+}
+
+/* ============================================================
+   RESPONSIVE DESIGN (ADAPTACIÓN MÓVIL)
+   ============================================================ */
+@media (max-width: 600px) {
+    #logo-unad { width: 130px; }
+    #robot-avatar { width: 60px; }
+    #logo-iris { font-size: 2.8rem; }
+    #cuadro-texto { padding: 1.2rem; min-height: 120px; }
+    .contenedor-linea { gap: 10px; }
+}
