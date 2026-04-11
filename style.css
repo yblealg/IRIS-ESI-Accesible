@@ -34,13 +34,11 @@ header, main {
 
 /* --- LOGO UNAD (OPTIMIZADO PARA ALTA DEFINICIÓN) --- */
 #logo-unad {
-    width: 170px; /* Tamaño ideal: legible pero no invasivo */
+    width: 160px;
     height: auto;
     display: block;
-    margin: 10px auto 20px auto; /* Espacio extra abajo para separar del robot */
-    opacity: 1;
-    filter: none; /* ELIMINADO: Sin filtros para mantener colores azul/naranja originales */
-    transition: transform 0.3s ease;
+    margin: 10px auto;
+    opacity: 1; /* Sin filtros, para que se vean los colores azul y naranja originales */
 }
 
 /* --- BLOQUE DE IDENTIDAD (ROBOT + NOMBRE) --- */
