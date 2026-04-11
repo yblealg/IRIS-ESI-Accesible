@@ -11,14 +11,13 @@ oido.interimResults = false;
 // FUNCIÓN PARA SELECCIONAR VOZ FEMENINA LATINA
 function obtenerVozFemenina() {
     const voces = sintetizador.getVoices();
-    
     // Prioridad: Voces de Colombia, México o generales de Google/Microsoft
     return voces.find(v => (v.lang.includes('es-CO') || v.lang.includes('es-MX') || v.lang.includes('es-ES')) && 
                     (v.name.includes('Helena') || v.name.includes('Sabina') || v.name.includes('Dalia') || v.name.includes('Google'))) 
            || voces.find(v => v.lang.includes('es'));
 }
 
-// FUNCIÓN DE VOZ DE IRIS
+// FUNCIÓN DE VOZ DE IRIS (CON REACCIÓN DEL ROBOT)
 function hablar(mensaje) {
     sintetizador.cancel();
     const lectura = new SpeechSynthesisUtterance(mensaje);
@@ -26,10 +25,16 @@ function hablar(mensaje) {
     lectura.voice = obtenerVozFemenina();
     lectura.lang = 'es-CO';
     lectura.rate = 1.0; 
-    lectura.pitch = 1.1; // Tono ligeramente más agudo/femenino
+    lectura.pitch = 1.1; 
 
     document.getElementById('texto-dinamico').innerText = mensaje;
-    document.getElementById('cuadro-texto').style.borderColor = "#00FF00"; // Verde al hablar
+    document.getElementById('cuadro-texto').style.borderColor = "#00FF00"; 
+
+    // REACCIÓN DEL ROBOT: Brillo verde al hablar
+    const robot = document.getElementById('robot-avatar');
+    if (robot) {
+        robot.style.filter = "drop-shadow(0 0 20px #00FF00)";
+    }
 
     lectura.onend = () => {
         setTimeout(() => iniciarEscucha(), 600);
@@ -38,12 +43,18 @@ function hablar(mensaje) {
     sintetizador.speak(lectura);
 }
 
-// FUNCIÓN DE ESCUCHA
+// FUNCIÓN DE ESCUCHA (CON REACCIÓN DEL ROBOT)
 function iniciarEscucha() {
     try {
         oido.start();
         document.getElementById('texto-dinamico').innerText = ">>> IRIS ESCUCHANDO... (Habla ahora)";
-        document.getElementById('cuadro-texto').style.borderColor = "yellow"; // Amarillo al oír
+        document.getElementById('cuadro-texto').style.borderColor = "yellow"; 
+        
+        // REACCIÓN DEL ROBOT: Brillo amarillo al escuchar
+        const robot = document.getElementById('robot-avatar');
+        if (robot) {
+            robot.style.filter = "drop-shadow(0 0 25px yellow)";
+        }
     } catch (e) { console.log("Micrófono activo"); }
 }
 
@@ -64,15 +75,21 @@ oido.onend = () => {
     if (document.getElementById('texto-dinamico').innerText.includes("ESCUCHANDO")) {
         const msg = "No logré escucharte. Toca cualquier parte de la pantalla o presiona una tecla para intentar de nuevo.";
         document.getElementById('texto-dinamico').innerText = msg;
-        document.getElementById('cuadro-texto').style.borderColor = "red"; // Rojo en error
+        document.getElementById('cuadro-texto').style.borderColor = "red"; 
         
+        // REACCIÓN DEL ROBOT: Brillo rojo en error
+        const robot = document.getElementById('robot-avatar');
+        if (robot) {
+            robot.style.filter = "drop-shadow(0 0 20px red)";
+        }
+
         const aviso = new SpeechSynthesisUtterance("No te escuché. Toca la pantalla para reintentar.");
         aviso.voice = obtenerVozFemenina();
         sintetizador.speak(aviso);
     }
 };
 
-// NAVEGACIÓN PEDAGÓGICA
+// NAVEGACIÓN PEDAGÓGICA (DIMENSIONES NUTRIDAS)
 function procesarComandos(comando) {
     if (comando.includes("cuerpo")) {
         hablar(`${nombreUsuario}, la dimensión biológica trata sobre tu salud y autonomía física. No se trata solo de la ausencia de enfermedad, ` +
