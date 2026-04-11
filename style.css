@@ -76,6 +76,27 @@ header, main { width: 100%; max-width: 800px; padding: 20px; box-sizing: border-
     animation: temblorError 0.5s ease-in-out;
 }
 
+/* --- NUEVA ALINEACIÓN HORIZONTAL --- */
+.contenedor-linea {
+    display: flex;
+    flex-direction: row; /* Robot a la izquierda, IRIS a la derecha */
+    align-items: center; /* Los nivela a la misma altura */
+    justify-content: center; /* Los centra en la pantalla */
+    gap: 20px; /* Separación de 20px entre ellos */
+    margin: 10px 0;
+}
+
+/* Reajuste para que el texto de IRIS no se vea movido */
+#logo-iris {
+    margin: 0; 
+}
+
+/* Asegura que el contenedor del robot no estorbe la línea */
+#avatar-robot-contenedor {
+    margin: 0;
+    display: flex;
+}
+
 /* --- CUADRO DE TEXTO (CENTRAL) --- */
 #cuadro-texto {
     border: 4px solid var(--neon-verde);
