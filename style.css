@@ -35,7 +35,33 @@ header h1 {
     font-size: 1.2rem;
     margin-bottom: 2rem;
 }
+/* ESTILO OPTIMIZADO PARA EL LOGO DE LA UNAD */
+#logo-unad {
+    /* 1. La hacemos más pequeña: la mitad del ancho actual o menos */
+    width: 130px; /* Prueba este tamaño, si la quieres aún más pequeña, baja el número */
+    height: auto; /* Mantiene la proporción para que no se vea estirada */
+    
+    /* 2. La ubicamos en la esquina superior derecha */
+    position: absolute; /* Para que flote sobre el fondo */
+    top: 20px; /* Separación del techo */
+    right: 20px; /* Separación del borde derecho */
+    
+    /* 3. Ajustes de contraste para fondo negro */
+    /* Este filtro la vuelve blanca o clara para que resalte en el negro */
+    filter: brightness(0) invert(1); 
+    
+    opacity: 0.9; /* Un poco de transparencia para un acabado elegante */
+    z-index: 1000; /* Asegura que siempre esté al frente */
+}
 
+/* Ajuste para celulares: aún más pequeña en pantallas chicas */
+@media (max-width: 600px) {
+    #logo-unad {
+        width: 100px;
+        top: 10px;
+        right: 10px;
+    }
+}
 #cuadro-texto {
     border: 4px solid var(--neon-verde);
     padding: 2rem;
