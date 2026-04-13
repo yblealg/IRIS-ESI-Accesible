@@ -4,6 +4,7 @@
    ============================================================ */
 
 let nombreUsuario = "";
+let temasPendientes = ["CUERPO", "MITOS", "DECISIÓN"];
 const sintetizador = window.speechSynthesis;
 const Reconocimiento = window.SpeechRecognition || window.webkitSpeechRecognition;
 const oido = new Reconocimiento();
@@ -19,7 +20,6 @@ let vozFemenina = null;
 
 function cargarVoces() {
     const voces = sintetizador.getVoices();
-    // Buscamos una voz que suene natural en español
     vozFemenina = voces.find(v => (v.lang.includes('es-CO') || v.lang.includes('es-MX')) && 
                                  (v.name.includes('Helena') || v.name.includes('Sabina') || v.name.includes('Google'))) 
                   || voces.find(v => v.lang.includes('es'));
@@ -36,17 +36,10 @@ function setRobotEstado(estado) {
     robot.classList.remove('robot-reposo', 'robot-hablando', 'robot-escuchando', 'robot-error');
     
     switch(estado) {
-        case 'hablando': 
-            robot.classList.add('robot-hablando'); 
-            break;
-        case 'escuchando': 
-            robot.classList.add('robot-escuchando'); 
-            break;
-        case 'error': 
-            robot.classList.add('robot-error'); 
-            break;
-        default: 
-            robot.classList.add('robot-reposo');
+        case 'hablando': robot.classList.add('robot-hablando'); break;
+        case 'escuchando': robot.classList.add('robot-escuchando'); break;
+        case 'error': robot.classList.add('robot-error'); break;
+        default: robot.classList.add('robot-reposo');
     }
 }
 
@@ -65,18 +58,12 @@ function hablar(mensaje) {
     const cuadro = document.getElementById('cuadro-texto');
     const contenedorCreditos = document.getElementById('efecto-creditos');
 
-    // Actualizar texto en pantalla
     if (display) display.innerText = mensaje;
     if (cuadro) cuadro.style.borderColor = "#00FF00"; 
     
-    /* REINICIO DE ANIMACIÓN DE CRÉDITOS 
-       Este bloque es el que hace que las letras siempre suban
-    */
     if (contenedorCreditos) {
         contenedorCreditos.style.animation = 'none';
-        contenedorCreditos.offsetHeight; // Truco de reflujo para resetear CSS
-        
-        // Ajustamos la velocidad según el largo del texto
+        contenedorCreditos.offsetHeight; 
         let velocidad = mensaje.length > 200 ? '28s' : '18s';
         contenedorCreditos.style.animation = `subirCreditos ${velocidad} linear infinite`;
     }
@@ -85,8 +72,10 @@ function hablar(mensaje) {
 
     lectura.onend = () => {
         setRobotEstado('reposo');
-        // Esperamos un momento antes de activar el micrófono
-        setTimeout(() => iniciarEscucha(), 700);
+        // Solo vuelve a escuchar si no hemos finalizado la sesión
+        if (!mensaje.includes("sesión finalizada")) {
+            setTimeout(() => iniciarEscucha(), 700);
+        }
     };
 
     sintetizador.speak(lectura);
@@ -104,7 +93,7 @@ function iniciarEscucha() {
         
         setRobotEstado('escuchando');
     } catch (e) { 
-        console.warn("El micrófono ya está intentando escuchar."); 
+        console.warn("Micrófono activo."); 
     }
 }
 
@@ -114,61 +103,81 @@ oido.onresult = (event) => {
     
     if (!nombreUsuario) {
         nombreUsuario = voz.replace("mi nombre es", "").replace("soy", "").trim();
-        hablar(`Mucho gusto, ${nombreUsuario}. Tienes derecho a decidir sobre tu vida. Para explorar los temas por favor pronuncia algunas de estas palabras: CUERPO, MITOS o DECISIÓN.`);
+        hablar(`Mucho gusto, ${nombreUsuario}. Tienes derecho a decidir sobre tu vida. Para explorar los temas por favor pronuncia: CUERPO, MITOS o DECISIÓN.`);
     } else {
         procesarComandos(voz);
     }
 };
 
-/* --- MANEJO DE ERRORES DE AUDIO --- */
+/* --- MANEJO DE ERRORES --- */
 oido.onend = () => {
     const display = document.getElementById('texto-dinamico');
     if (display && display.innerText.includes("ESCUCHANDO")) {
-        const msg = "No logré escucharte. Toca la pantalla o el botón ACTIVAR para intentar de nuevo.";
-        display.innerText = msg;
-        document.getElementById('cuadro-texto').style.borderColor = "red"; 
-        
         setRobotEstado('error');
         setTimeout(() => setRobotEstado('reposo'), 1200);
-
-        const aviso = new SpeechSynthesisUtterance("No te escuché. Toca la pantalla para reintentar.");
-        aviso.voice = vozFemenina;
-        sintetizador.speak(aviso);
+        hablar("No logré escucharte. Toca la pantalla o el botón para intentar de nuevo.");
     }
 };
 
-/* --- NAVEGACIÓN PEDAGÓGICA (CONTENIDO UNAD) --- */
+/* --- NAVEGACIÓN PEDAGÓGICA (FILTRADA Y CON CIERRE) --- */
 function procesarComandos(comando) {
-    if (comando.includes("cuerpo")) {
-        hablar(`${nombreUsuario}, la dimensión biológica trata sobre tu salud y autonomía física. No se trata solo de la ausencia de enfermedad, sino del conocimiento de tu anatomía, tus sentidos y tus funciones reproductivas. Implica el derecho a recibir servicios de salud adaptados a tus necesidades, el acceso a información clara sobre higiene, prevención y la libertad de disfrutar de tu bienestar físico sin que la discapacidad sea vista como una limitación de tu integridad. ¿Quieres ver MITOS o DECISIÓN?`);
+    let respuesta = "";
+
+    // Opción para salir o finalizar
+    if (comando.includes("salir") || comando.includes("finalizar") || comando.includes("terminar")) {
+        hablar(`Gracias por participar, ${nombreUsuario}. Tu voz y tu autonomía son lo más importante. Hasta pronto, sesión finalizada.`);
+        return;
+    }
+
+    // Opción para reiniciar el contenido
+    if (comando.includes("inicio") || comando.includes("repetir") || comando.includes("reiniciar")) {
+        temasPendientes = ["CUERPO", "MITOS", "DECISIÓN"];
+        hablar(`Muy bien ${nombreUsuario}, reiniciamos el recorrido. Elige una dimensión: CUERPO, MITOS o DECISIÓN.`);
+        return;
+    }
+
+    // Filtrado de temas
+    if (comando.includes("cuerpo") && temasPendientes.includes("CUERPO")) {
+        temasPendientes = temasPendientes.filter(t => t !== "CUERPO");
+        respuesta = `${nombreUsuario}, la dimensión biológica trata sobre tu salud y autonomía física. Implica el conocimiento de tu anatomía y el acceso a servicios de salud sin que la discapacidad limite tu integridad. `;
     } 
-    else if (comando.includes("mitos")) {
-        hablar(`Escucha bien, ${nombreUsuario}. La dimensión social rompe barreras. No hay límites para el deseo en la discapacidad. Reconoce que las personas con discapacidad son seres sexuales con derecho a amar, ser amados y expresar su erotismo sin juicios. Esta dimensión denuncia las barreras del entorno y los prejuicios de la sociedad que intentan infantilizar o invisibilizar tu sexualidad. ¿Quieres ir a CUERPO o DECISIÓN?`);
+    else if (comando.includes("mitos") && temasPendientes.includes("MITOS")) {
+        temasPendientes = temasPendientes.filter(t => t !== "MITOS");
+        respuesta = `Escucha bien, ${nombreUsuario}. La dimensión social rompe barreras. Las personas con discapacidad tienen derecho a amar y expresar su erotismo sin prejuicios de la sociedad. `;
     } 
-    else if (comando.includes("decisión") || comando.includes("ética") || comando.includes("decision")) {
-        hablar(`${nombreUsuario}, la dimensión ética es tu poder de decidir. Se fundamenta en la autonomía y en la capacidad de elegir tus propios valores y estilo de vida. Implica el juicio crítico para distinguir entre lo que deseas y lo que otros te imponen, asegurando que el consentimiento sea siempre el pilar de tus relaciones. Es tu derecho a decir no, a decir sí, y a ser responsable de tus decisiones afectivas. ¿Quieres volver a explorar? Di: CUERPO, MITOS o INICIO.`);
-    } 
-    else if (comando.includes("inicio")) {
-        hablar(`Hola de nuevo ${nombreUsuario}. Elige una dimensión para profundizar: CUERPO, MITOS o DECISIÓN.`);
+    else if ((comando.includes("decisión") || comando.includes("ética") || comando.includes("decision")) && temasPendientes.includes("DECISIÓN")) {
+        temasPendientes = temasPendientes.filter(t => t !== "DECISIÓN");
+        respuesta = `${nombreUsuario}, la dimensión ética es tu poder de elegir. Implica el juicio crítico para decidir sobre tus relaciones basándote siempre en el consentimiento. `;
     } 
     else {
-        hablar(`No logré entenderte ${nombreUsuario}. Intenta decir una de las opciones: Cuerpo, Mitos o Decisión.`);
+        if (temasPendientes.length > 0) {
+            hablar(`Ese tema ya lo vimos o no es válido, ${nombreUsuario}. Por favor elige: ${temasPendientes.join(", ")}.`);
+        } else {
+            hablar(`Ya exploramos todo, ${nombreUsuario}. ¿Deseas REPETIR el contenido o prefieres SALIR?`);
+        }
+        return;
     }
+
+    // Lógica de continuación o finalización
+    if (temasPendientes.length > 0) {
+        respuesta += `¡Muy bien! Ahora solo nos falta explorar: ${temasPendientes.join(" o ")}. ¿Cuál eliges?`;
+    } else {
+        respuesta += `¡Felicidades ${nombreUsuario}! Has completado todas las dimensiones. Ahora tienes más herramientas para tu autonomía. ¿Quieres REPETIR el inicio o prefieres SALIR?`;
+    }
+
+    hablar(respuesta);
 }
 
 /* --- FUNCIÓN DE ARRANQUE --- */
 function iniciar() {
-    // Desbloqueo de audio para móviles
-    if (sintetizador.paused) {
-        sintetizador.resume();
-    }
-    
+    if (sintetizador.paused) sintetizador.resume();
     nombreUsuario = ""; 
+    temasPendientes = ["CUERPO", "MITOS", "DECISIÓN"];
     setRobotEstado('reposo');
-    hablar("Bienvenido a este espacio seguro, soy IRIS. Mi misión es brindarte herramientas claras sobre educación sexual integral, sin barreras y con total respeto por tu diversidad. Aquí, la información es libertad y el consentimiento es nuestra base. ¿Con quién tengo el gusto de hablar?");
+    hablar("Bienvenido a este espacio seguro, soy IRIS. Mi misión es brindarte herramientas sobre educación sexual integral y autonomía. ¿Con quién tengo el gusto de hablar?");
 }
 
-/* --- EVENTOS DE ACCESIBILIDAD --- */
+/* --- EVENTOS --- */
 document.addEventListener("DOMContentLoaded", () => {
     const btn = document.getElementById("btn-iniciar");
     if (btn) {
@@ -182,7 +191,7 @@ document.addEventListener("DOMContentLoaded", () => {
 window.addEventListener('click', (e) => {
     const display = document.getElementById('texto-dinamico');
     if (e.target.id !== "btn-iniciar" && display && 
-       (display.innerText.includes("Presiona") || display.innerText.includes("No logré"))) {
+       (display.innerText.includes("Presiona") || display.innerText.includes("No logré") || display.innerText.includes("finalizada"))) {
         iniciar();
     }
 });
