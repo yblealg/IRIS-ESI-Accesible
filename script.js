@@ -91,7 +91,7 @@ oido.onresult = (event) => {
     if (!nombreUsuario) {
         // Limpieza básica de la entrada del nombre
         nombreUsuario = voz.replace("mi nombre es", "").replace("soy", "").trim();
-        hablar(`Mucho gusto, ${nombreUsuario}. Tienes derecho a decidir sobre tu vida. Di: CUERPO, MITOS o DECISIÓN.`);
+        hablar(`Mucho gusto, ${nombreUsuario}. Tienes derecho a decidir sobre tu vida. Para explorar los temas por favor pronuncia algunas de estas palabras: CUERPO, MITOS o DECISIÓN.`);
     } else {
         procesarComandos(voz);
     }
@@ -104,7 +104,7 @@ oido.onend = () => {
 
     // Si el texto sigue diciendo "ESCUCHANDO" es porque no captó nada
     if (display && display.innerText.includes("ESCUCHANDO")) {
-        const msg = "No logré escucharte. Toca la pantalla o el botón para intentar de nuevo.";
+        const msg = "No logré escucharte. Toca la pantalla, haz click o el toca el botón activar para intentar de nuevo.";
         display.innerText = msg;
         if (cuadro) cuadro.style.borderColor = "red"; 
         
@@ -142,7 +142,7 @@ function procesarComandos(comando) {
         hablar(`Hola de nuevo ${nombreUsuario}. Elige una dimensión para profundizar: CUERPO, MITOS o DECISIÓN.`);
     } 
     else {
-        hablar("No logré entenderte. Intenta decir una de las opciones: Cuerpo, Mitos o Decisión.");
+        hablar(`No logré entenderte ${nombreUsuario}. Intenta decir una de las opciones: Cuerpo, Mitos o Decisión.`);
     }
 }
 
@@ -155,7 +155,7 @@ function iniciarSistema() {
     
     nombreUsuario = ""; 
     setRobotEstado('reposo');
-    hablar("Hola, soy IRIS. Tu guía de educación sexual integral. ¿Cuál es tu nombre?");
+    hablar("Bienvenido a este espacio seguro, soy IRIS. Mi misión es brindarte herramientas claras sobre educación sexual integral, sin barreras y con total respeto por tu diversidad. Aquí, la información es libertad y el consentimiento es nuestra base. ¿Con quién tengo el gusto de hablar?");
 }
 
 /* ============================================================
