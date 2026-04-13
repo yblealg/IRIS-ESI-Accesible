@@ -5,9 +5,9 @@
     --fondo: #000000;
     --neon-verde: #00FF00;
     --neon-amarillo: #FFFF00;
+    --neon-azul: #00FFFF;
     --error-rojo: #FF0000;
     --blanco: #FFFFFF;
-    --unad-azul: #003366; /* Color institucional por si se requiere */
 }
 
 body {
@@ -15,30 +15,45 @@ body {
     color: var(--blanco);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
+    padding: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
-    min-height: 100vh;
+    /* FIX: Cambiado a space-between para asegurar que el botón no suba demasiado */
+    justify-content: space-between; 
+    height: 100vh;
+    height: calc(var(--vh, 1vh) * 100);
     text-align: center;
-    overflow-x: hidden;
+    overflow: hidden; /* Vital para que no haya scroll en el Motorola */
 }
 
 /* Contenedores principales */
-header, main { 
+header { 
     width: 100%; 
     max-width: 800px; 
-    padding: 20px; 
+    padding: 15px; 
     box-sizing: border-box; 
+    flex-shrink: 0;
 }
 
-/* --- LOGO UNAD (OPTIMIZADO PARA ALTA DEFINICIÓN) --- */
+main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centra el cuadro y el botón verticalmente */
+    align-items: center;
+    width: 100%;
+    max-width: 600px;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+/* --- LOGO UNAD --- */
 #logo-unad {
-    width: 160px;
+    width: 140px;
     height: auto;
     display: block;
-    margin: 10px auto;
-    opacity: 1; /* Sin filtros, para que se vean los colores azul y naranja originales */
+    margin: 5px auto;
 }
 
 /* --- BLOQUE DE IDENTIDAD (ROBOT + NOMBRE) --- */
@@ -47,58 +62,48 @@ header, main {
     flex-direction: row; 
     align-items: center; 
     justify-content: center; 
-    gap: 15px; /* Espacio equilibrado entre robot e IRIS */
+    gap: 15px;
     margin: 10px 0;
 }
 
-#avatar-robot-contenedor {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
 #robot-avatar {
-    width: 75px; /* Tamaño reducido para no competir con el título */
+    width: 70px;
     height: auto;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 /* Título Principal */
 #logo-iris { 
-    font-size: clamp(2.5rem, 8vw, 4rem); 
+    font-size: clamp(2.5rem, 8vw, 3.5rem); 
     margin: 0; 
     color: var(--neon-verde); 
     text-shadow: 0 0 15px rgba(0, 255, 0, 0.7); 
 }
 
 /* Subtítulos */
-.acronimo { font-size: 1.1rem; color: var(--blanco); margin: 5px 0; letter-spacing: 1px; }
-.eslogan { color: var(--neon-amarillo); font-size: 1rem; margin-top: 0; font-style: italic; }
+.acronimo { font-size: 1rem; color: var(--blanco); margin: 5px 0; letter-spacing: 1px; }
+.eslogan { color: var(--neon-amarillo); font-size: 0.9rem; margin-top: 0; font-style: italic; }
 
 /* ============================================================
-   ESTADOS DEL ROBOT (GESTIONADOS POR JAVASCRIPT)
+   ESTADOS DEL ROBOT (Tus animaciones originales corregidas)
    ============================================================ */
 
-/* 1. Reposo: Movimiento suave */
 .robot-reposo {
     filter: drop-shadow(0 0 8px var(--neon-verde));
     animation: levitarReposo 4s ease-in-out infinite;
 }
 
-/* 2. Hablando: Vibración activa */
 .robot-hablando {
     filter: drop-shadow(0 0 15px var(--neon-verde)) brightness(1.2);
     animation: vibrarHabla 0.2s ease-in-out infinite;
 }
 
-/* 3. Escuchando: Pulso de atención */
 .robot-escuchando {
     filter: drop-shadow(0 0 25px var(--neon-amarillo));
     animation: pulsoEscucha 1.2s ease-in-out infinite;
     transform: scale(1.1);
 }
 
-/* 4. Error: Sacudida roja */
 .robot-error {
     filter: drop-shadow(0 0 15px var(--error-rojo));
     animation: temblorError 0.5s ease-in-out;
@@ -108,42 +113,56 @@ header, main {
    INTERFAZ DE USUARIO (CUADRO Y BOTÓN)
    ============================================================ */
 #cuadro-texto {
+    box-sizing: border-box; /* FIX: Evita el estrechamiento */
     border: 3px solid var(--neon-verde);
-    padding: 2rem;
+    padding: 1.5rem;
     border-radius: 25px;
-    margin: 20px auto;
-    min-height: 140px;
+    width: 90%;
+    max-width: 500px;
+    height: 40vh; /* Altura responsiva estable */
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: rgba(0, 255, 0, 0.03); /* Fondo sutil para legibilidad */
+    background-color: rgba(0, 255, 0, 0.05);
     box-shadow: 0 0 30px rgba(0, 255, 0, 0.1);
     transition: border-color 0.4s ease, box-shadow 0.4s ease;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0; /* FIX: Impide que el cuadro se cierre en móvil */
 }
 
 #texto-dinamico { 
-    font-size: clamp(1.1rem, 3.2vw, 1.7rem); 
+    font-size: clamp(1rem, 3.5vw, 1.4rem); 
     font-weight: 700; 
     line-height: 1.4; 
     color: var(--neon-verde); 
+    margin: 0;
 }
 
 #btn-iniciar {
     background-color: var(--neon-verde);
     color: #000;
     border: none;
-    padding: 16px 40px;
-    font-size: 1.3rem;
+    padding: 16px 45px;
+    font-size: 1.2rem;
     font-weight: 800;
     cursor: pointer;
-    margin-top: 20px;
+    margin: 20px 0;
     border-radius: 50px;
-    box-shadow: 0 5px 15px rgba(0, 255, 0, 0.4);
-    transition: all 0.2s ease;
+    box-shadow: 0 5px 0px #009900; /* Efecto mecánico sólido */
+    transition: all 0.1s ease;
+    text-transform: uppercase;
+    
+    /* FIX: Prioridad de clic */
+    position: relative;
+    z-index: 100; 
+    pointer-events: auto;
 }
 
-#btn-iniciar:hover { transform: scale(1.05); box-shadow: 0 0 25px var(--neon-verde); }
-#btn-iniciar:active { transform: scale(0.95); }
+#btn-iniciar:active {
+    transform: translateY(4px); /* Efecto de hundirse */
+    box-shadow: 0 0px 0px #009900;
+}
 
 /* ============================================================
    DEFINICIÓN DE ANIMACIONES (KEYFRAMES)
@@ -170,13 +189,20 @@ header, main {
     75% { transform: translateX(8px); } 
 }
 
+footer {
+    padding: 10px;
+    font-size: 0.65rem;
+    flex-shrink: 0;
+    width: 100%;
+}
+
 /* ============================================================
    RESPONSIVE DESIGN (ADAPTACIÓN MÓVIL)
    ============================================================ */
 @media (max-width: 600px) {
-    #logo-unad { width: 130px; }
+    #logo-unad { width: 110px; }
     #robot-avatar { width: 60px; }
-    #logo-iris { font-size: 2.8rem; }
-    #cuadro-texto { padding: 1.2rem; min-height: 120px; }
-    .contenedor-linea { gap: 10px; }
+    #logo-iris { font-size: 2.5rem; }
+    #cuadro-texto { padding: 1rem; height: 38vh; }
+    #btn-iniciar { padding: 14px 35px; font-size: 1rem; }
 }

@@ -1,4 +1,6 @@
-// CONFIGURACIÓN DE NAVEGACIÓN Y MOTORES
+/* ============================================================
+   CONFIGURACIÓN DE NAVEGACIÓN Y MOTORES - PROYECTO IRIS
+   ============================================================ */
 let nombreUsuario = "";
 const sintetizador = window.speechSynthesis;
 const Reconocimiento = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -13,18 +15,23 @@ oido.interimResults = false;
 let vozFemenina = null;
 function cargarVoces() {
     const voces = sintetizador.getVoices();
-    vozFemenina = voces.find(v => (v.lang.includes('es-CO') || v.lang.includes('es-MX') || v.lang.includes('es-ES')) && 
-                                (v.name.includes('Helena') || v.name.includes('Sabina') || v.name.includes('Dalia') || v.name.includes('Google'))) 
-                 || voces.find(v => v.lang.includes('es'));
+    // Prioridad: Voces de Google o locales que suenen naturales y femeninas
+    vozFemenina = voces.find(v => (v.lang.includes('es-CO') || v.lang.includes('es-MX')) && 
+                                 (v.name.includes('Helena') || v.name.includes('Sabina') || v.name.includes('Google'))) 
+                  || voces.find(v => v.lang.includes('es'));
 }
-// Forzar carga de voces en navegadores lentos
-if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = cargarVoces;
+
+if (speechSynthesis.onvoiceschanged !== undefined) {
+    speechSynthesis.onvoiceschanged = cargarVoces;
+}
 cargarVoces();
 
-// FUNCIÓN PARA GESTIONAR ESTADOS VISUALES DEL ROBOT
+// FUNCIÓN PARA GESTIONAR ESTADOS VISUALES DEL ROBOT (Tus clases del CSS)
 function setRobotEstado(estado) {
     if (!robot) return;
-    robot.className = ""; // Limpiar clases anteriores
+    // Limpiamos todas las posibles clases de estado antes de poner la nueva
+    robot.classList.remove('robot-reposo', 'robot-hablando', 'robot-escuchando', 'robot-error');
+    
     switch(estado) {
         case 'hablando': robot.classList.add('robot-hablando'); break;
         case 'escuchando': robot.classList.add('robot-escuchando'); break;
@@ -33,49 +40,57 @@ function setRobotEstado(estado) {
     }
 }
 
-// FUNCIÓN DE VOZ DE IRIS (DINÁMICA)
+// FUNCIÓN DE VOZ DE IRIS (CON PARCHE PARA MÓVILES)
 function hablar(mensaje) {
-    sintetizador.cancel();
+    sintetizador.cancel(); // Detener cualquier habla previa
     const lectura = new SpeechSynthesisUtterance(mensaje);
     
-    if (!vozFemenina) cargarVoces(); // Intento final de carga
+    if (!vozFemenina) cargarVoces(); 
     lectura.voice = vozFemenina;
     lectura.lang = 'es-CO';
     lectura.rate = 1.0; 
     lectura.pitch = 1.1; 
 
-    document.getElementById('texto-dinamico').innerText = mensaje;
-    document.getElementById('cuadro-texto').style.borderColor = "#00FF00"; 
+    const cuadro = document.getElementById('cuadro-texto');
+    const display = document.getElementById('texto-dinamico');
+
+    if (display) display.innerText = mensaje;
+    if (cuadro) cuadro.style.borderColor = "#00FF00"; 
     
-    // ACTIVAR ANIMACIÓN DE HABLA
     setRobotEstado('hablando');
 
     lectura.onend = () => {
+        setRobotEstado('reposo');
+        // Pequeño delay para que el usuario procese antes de abrir micro
         setTimeout(() => iniciarEscucha(), 600);
     };
 
     sintetizador.speak(lectura);
 }
 
-// FUNCIÓN DE ESCUCHA (DINÁMICA)
+// FUNCIÓN DE ESCUCHA (CON CONTROL DE ERRORES)
 function iniciarEscucha() {
     try {
         oido.start();
-        document.getElementById('texto-dinamico').innerText = ">>> IRIS ESCUCHANDO... (Habla ahora)";
-        document.getElementById('cuadro-texto').style.borderColor = "yellow"; 
+        const display = document.getElementById('texto-dinamico');
+        const cuadro = document.getElementById('cuadro-texto');
         
-        // ACTIVAR ANIMACIÓN DE ESCUCHA (PULSO AMARILLO)
+        if (display) display.innerText = ">>> IRIS ESCUCHANDO... (Habla ahora)";
+        if (cuadro) cuadro.style.borderColor = "yellow"; 
+        
         setRobotEstado('escuchando');
-
-    } catch (e) { console.log("Micrófono activo"); }
+    } catch (e) { 
+        console.log("El reconocimiento ya estaba activo o hubo un error."); 
+    }
 }
 
-// REACCIÓN AL HABLAR
+// REACCIÓN AL HABLAR (TU LÓGICA DE NOMBRE)
 oido.onresult = (event) => {
     const voz = event.results[0][0].transcript.toLowerCase();
     
     if (!nombreUsuario) {
-        nombreUsuario = voz;
+        // Limpieza básica de la entrada del nombre
+        nombreUsuario = voz.replace("mi nombre es", "").replace("soy", "").trim();
         hablar(`Mucho gusto, ${nombreUsuario}. Tienes derecho a decidir sobre tu vida. Di: CUERPO, MITOS o DECISIÓN.`);
     } else {
         procesarComandos(voz);
@@ -84,15 +99,17 @@ oido.onresult = (event) => {
 
 // MANEJO DE ERRORES/SILENCIOS
 oido.onend = () => {
-    if (document.getElementById('texto-dinamico').innerText.includes("ESCUCHANDO")) {
-        const msg = "No logré escucharte. Toca cualquier parte de la pantalla o presiona una tecla para intentar de nuevo.";
-        document.getElementById('texto-dinamico').innerText = msg;
-        document.getElementById('cuadro-texto').style.borderColor = "red"; 
+    const display = document.getElementById('texto-dinamico');
+    const cuadro = document.getElementById('cuadro-texto');
+
+    // Si el texto sigue diciendo "ESCUCHANDO" es porque no captó nada
+    if (display && display.innerText.includes("ESCUCHANDO")) {
+        const msg = "No logré escucharte. Toca la pantalla o el botón para intentar de nuevo.";
+        display.innerText = msg;
+        if (cuadro) cuadro.style.borderColor = "red"; 
         
-        // ACTIVAR ANIMACIÓN DE ERROR (TEMBLOR ROJO)
         setRobotEstado('error');
-        // Volver a reposo tras el temblor
-        setTimeout(() => setRobotEstado('reposo'), 600);
+        setTimeout(() => setRobotEstado('reposo'), 1000);
 
         const aviso = new SpeechSynthesisUtterance("No te escuché. Toca la pantalla para reintentar.");
         aviso.voice = vozFemenina;
@@ -100,7 +117,7 @@ oido.onend = () => {
     }
 };
 
-// NAVEGACIÓN PEDAGÓGICA (DIMENSIONES NUTRIDAS)
+// NAVEGACIÓN PEDAGÓGICA (TUS TEMAS COMPLETOS)
 function procesarComandos(comando) {
     if (comando.includes("cuerpo")) {
         hablar(`${nombreUsuario}, la dimensión biológica trata sobre tu salud y autonomía física. No se trata solo de la ausencia de enfermedad, ` +
@@ -115,7 +132,7 @@ function procesarComandos(comando) {
                `Se trata de tu derecho a participar en la vida social, a formar una familia si lo deseas y a que tu intimidad sea respetada como la de cualquier otro ciudadano. ` +
                `¿Quieres ir a CUERPO o DECISIÓN?`);
     } 
-    else if (comando.includes("decisión") || comando.includes("ética")) {
+    else if (comando.includes("decisión") || comando.includes("ética") || comando.includes("decision")) {
         hablar(`${nombreUsuario}, la dimensión ética es tu poder de decidir. Se fundamenta en la autonomía y en la capacidad de elegir tus propios valores y estilo de vida. ` +
                `Implica el juicio crítico para distinguir entre lo que deseas y lo que otros te imponen, asegurando que el consentimiento sea siempre el pilar de tus relaciones. ` +
                `Es tu derecho a decir no, a decir sí, y a ser responsable de tus decisiones afectivas en un marco de respeto y libertad personal. ` +
@@ -129,28 +146,46 @@ function procesarComandos(comando) {
     }
 }
 
-// ACTIVACIÓN DEL SISTEMA
+// ACTIVACIÓN DEL SISTEMA (Función vinculada al botón)
 function iniciarSistema() {
+    // IMPORTANTE: Desbloquea el motor de audio en navegadores móviles
+    if (sintetizador.paused) {
+        sintetizador.resume();
+    }
+    
     nombreUsuario = ""; 
-    // Asegurar estado inicial del robot
     setRobotEstado('reposo');
-    hablar("Hola, soy IRIS. Tu guía de educación sexual. ¿Cuál es tu nombre?");
+    hablar("Hola, soy IRIS. Tu guía de educación sexual integral. ¿Cuál es tu nombre?");
 }
 
-// ACCESIBILIDAD GLOBAL (CLIC O TECLA)
+/* ============================================================
+   ACCESIBILIDAD GLOBAL Y FIXES MÓVILES
+   ============================================================ */
+
+// Evento para el botón en pantallas táctiles (Evita el lag de 300ms)
+document.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById("btn-iniciar");
+    if (btn) {
+        btn.addEventListener("touchstart", (e) => {
+            e.preventDefault(); // Evita que el navegador lance el click normal después
+            iniciarSistema();
+        }, { passive: false });
+    }
+});
+
+// Teclado y Click General
 window.addEventListener('keydown', (e) => {
-    // Evitamos re-iniciar si ya está hablando o escuchando
-    if (document.getElementById('cuadro-texto').style.borderColor === "red" || 
-        document.getElementById('cuadro-texto').innerText.includes("Presiona")) {
+    const display = document.getElementById('texto-dinamico');
+    if (display && (display.innerText.includes("Presiona") || display.innerText.includes("No logré"))) {
         iniciarSistema();
     }
 });
 
 window.addEventListener('click', (e) => {
-    // Evitamos si hizo clic en el botón (para no duplicar) o si ya está activo
-    if (e.target.id !== "btn-iniciar" && (
-        document.getElementById('cuadro-texto').style.borderColor === "red" || 
-        document.getElementById('cuadro-texto').innerText.includes("Presiona"))) {
+    const display = document.getElementById('texto-dinamico');
+    // Si no es el botón (porque él ya tiene su onclick) y estamos en pantalla de inicio o error
+    if (e.target.id !== "btn-iniciar" && display && 
+       (display.innerText.includes("Presiona") || display.innerText.includes("No logré"))) {
         iniciarSistema();
     }
 });
