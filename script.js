@@ -103,7 +103,7 @@ oido.onresult = (event) => {
     
     if (!nombreUsuario) {
         nombreUsuario = voz.replace("mi nombre es", "").replace("soy", "").trim();
-        hablar(`Mucho gusto, ${nombreUsuario}. Tienes derecho a decidir sobre tu vida. Para explorar los temas por favor pronuncia: CUERPO, MITOS o DECISIÓN.`);
+        hablar(`Mucho gusto, ${nombreUsuario}. Tienes derecho a decidir sobre tu vida. Para explorar los temas por favor pronuncia: CUERPO, MITOS, DECISIÓN, IDENTIDAD Ó SENTIMIENTOS .`);
     } else {
         procesarComandos(voz);
     }
@@ -131,8 +131,8 @@ function procesarComandos(comando) {
 
     // Opción para reiniciar el contenido
     if (comando.includes("inicio") || comando.includes("repetir") || comando.includes("reiniciar")) {
-        temasPendientes = ["CUERPO", "MITOS", "DECISIÓN"];
-        hablar(`Muy bien ${nombreUsuario}, reiniciamos el recorrido. Elige una dimensión: CUERPO, MITOS o DECISIÓN.`);
+        temasPendientes = ["CUERPO", "MITOS", "DECISIÓN", "IDENTIDAD", "SENTIMIENTOS"];
+        hablar(`Muy bien ${nombreUsuario}, reiniciamos el recorrido. Elige una dimensión: CUERPO, MITOS, DECISIÓN, IDENTIDAD Ó SENTIMIENTOS.`);
         return;
     }
 
@@ -145,9 +145,17 @@ function procesarComandos(comando) {
         temasPendientes = temasPendientes.filter(t => t !== "MITOS");
         respuesta = `Escucha bien, ${nombreUsuario}. La dimensión social rompe barreras. Las personas con discapacidad tienen derecho a amar y expresar su erotismo sin prejuicios de la sociedad. `;
     } 
-    else if ((comando.includes("decisión") || comando.includes("ética") || comando.includes("decision")) && temasPendientes.includes("DECISIÓN")) {
+    else if ((comando.includes("decisión") || comando.includes("DECISIÓN") || comando.includes("decision")) && temasPendientes.includes("DECISIÓN")) {
         temasPendientes = temasPendientes.filter(t => t !== "DECISIÓN");
         respuesta = `${nombreUsuario}, la dimensión ética es tu poder de elegir. Implica el juicio crítico para decidir sobre tus relaciones basándote siempre en el consentimiento. `;
+    } 
+    else if ((comando.includes("identidad") || comando.includes("IDENTIDAD") || comando.includes("identidad")) && temasPendientes.includes("IDENTIDAD")) {
+        temasPendientes = temasPendientes.filter(t => t !== "IDENTIDAD");
+        respuesta = `${nombreUsuario}, La Identidad es el conjunto de características, valores y sentimientos que te hacen una persona única. En esta dimensión, exploramos tu autoestima y el reconocimiento de tu propio cuerpo más allá de lo físico. Se trata de fortalecer la seguridad en ti mismo, entendiendo que tu discapacidad visual es solo una parte de quién eres y que tienes el derecho pleno de construir tu propia imagen, sentirte bien contigo mismo y proyectar tu personalidad con dignidad y orgullo. `;
+    }
+    else if ((comando.includes("sentimientos") || comando.includes("SENTIMIENTOS") || comando.includes("sentimientos")) && temasPendientes.includes("SENTIMIENTOS")) {
+        temasPendientes = temasPendientes.filter(t => t !== "SENTIMIENTOS");
+        respuesta = `${nombreUsuario}, Los Sentimientos son la forma en que procesamos nuestras emociones y nos vinculamos con los demás. Esta dimensión te invita a explorar la importancia del afecto, el respeto mutuo y la comunicación en tus relaciones. Se trata de aprender a expresar lo que sientes de manera clara, a identificar tus deseos y a construir lazos basados en la confianza. Aquí entendemos que el amor, la amistad y el afecto son experiencias fundamentales que tienes derecho a vivir plenamente, reconociendo siempre tus propias emociones y las de las personas que te rodean. `;
     } 
     else {
         if (temasPendientes.length > 0) {
@@ -172,7 +180,7 @@ function procesarComandos(comando) {
 function iniciar() {
     if (sintetizador.paused) sintetizador.resume();
     nombreUsuario = ""; 
-    temasPendientes = ["CUERPO", "MITOS", "DECISIÓN"];
+    temasPendientes = ["CUERPO", "MITOS", "DECISIÓN", "IDENTIDAD", "SENTIMIENTOS"];
     setRobotEstado('reposo');
     hablar("Bienvenido a este espacio seguro, soy IRIS. Mi misión es brindarte herramientas sobre educación sexual integral y autonomía. ¿Con quién tengo el gusto de hablar?");
 }
